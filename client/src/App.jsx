@@ -12,7 +12,7 @@ import {
 function App() {
   const [message, setMessage]=useState("")
   const [messages, setMessages] = useState([]);
-  const socket=useMemo(()=>io("http://localhost:3000"),[]);  //tries to create a persistent connection between client to server , using useMemo() causes no re-rendering when some update is done in the state and hooks ,, but this will start afresh when the app is refreshed ,,
+  const socket=useMemo(()=>io("https://web-socket-chat-app-cus7.onrender.com"),[]);  //tries to create a persistent connection between client to server , using useMemo() causes no re-rendering when some update is done in the state and hooks ,, but this will start afresh when the app is refreshed ,,
   const [room, setRoom] = useState("");
   const [socketID, setSocketId] = useState("");
   const [roomName, setRoomName] = useState("");
