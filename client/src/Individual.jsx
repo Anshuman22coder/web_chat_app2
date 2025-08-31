@@ -21,7 +21,7 @@ function Individual() {
     }
     return userId;
   },[])
-  const socket=useMemo(()=>io("http://localhost:3000",{query:{userId}}),[]);  //tries to create a persistent connection between client to server , using useMemo() causes no re-rendering when some update is done in the state and hooks ,, but this will start afresh when the app is refreshed ,,
+  const socket=useMemo(()=>io("https://web-socket-chat-app-1-backend-2.onrender.com/",{query:{userId}}),[]);  //tries to create a persistent connection between client to server , using useMemo() causes no re-rendering when some update is done in the state and hooks ,, but this will start afresh when the app is refreshed ,,
   const [room, setRoom] = useState("");
   const [socketID, setSocketId] = useState("");
   
