@@ -75,6 +75,6 @@ io.on("connection",(socket)=>{  //listens .. to incomming connections..
 app.get("/",(req,res)=>{
   res.send("HI")
 })
-server.listen (3000,()=>{
-  console.log('server listening at 3000')
+server.listen (4000,()=>{
+  console.log('server listening at 4000')
 })
