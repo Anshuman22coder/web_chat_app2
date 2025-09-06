@@ -110,7 +110,7 @@ gsap.from(".Box h4 .a",{
 
 
   useEffect(()=>{
-    const currentDate = new Date().toLocaleTimeString();; // Represents the current date and time
+   // Represents the current date and time
     socket.on("connect",()=>{  //connect is the defaultevent name that is emitted by socket.io when the client successfully establishes connection with the server.
       setSocketId(socket.id);
       console.log("connected",socket.id);
@@ -122,13 +122,30 @@ gsap.from(".Box h4 .a",{
     /* socket.on("recieve-message",(s)=>{
       console.log(`${s}`)
      })*/
-    socket.on("recieve-message", ({ message, sender ,room}) => {
-  console.log("Message from room:", sender, "->", message);
-  setMessages((messages) => [...messages, { message, sender,room,currentDate}]);
+
+   //msg rendering via socket.on("chat-history")   ...
+   socket.on("chat-history",(history)=>{
+    setMessages(history)
+   })
+
+
+
+
+
+
+
+
+
+
+    socket.on("recieve-message", ({ id,sender ,message, currentDate}) => {
+  console.log("Message room: for ",id,"and from sender", sender, "->", message);
+  setMessages((messages) => [...messages, { id,sender ,message, currentDate}]);
 });
 
       return()=>{
         console.log("i disconnected")
+        socket.off("recieve-message");
+        socket.off("chat-history");
         socket.disconnect(); //automatic disonnect ,,//when I refresh the page ,,then this will force the cleanup fucntion
       }
   },[socket])  //only when this socket is changed then this will be re-rendered.
@@ -211,21 +228,37 @@ gsap.from(".Box h4 .a",{
           </Typography>
        
         <Stack sx={{
-    backgroundColor:messages.length>=1?"coral":"lightred",
-    padding: "20px",
+    backgroundColor:messages.length>=1?"lightbrown":"lightred",
+    padding: "2px",
     borderRadius: "8px",
     margin: "10px 1px",
     display:"flex",
-    justifyContent:"center",
-    alignItems:"center",
-    alignContent:"center"}}>
-       {messages.map((m, i) => (
-  <Typography key={i} variant="h6" component="div" gutterBottom  
-   
-  >
-    {console.log(m.message)}
+    justifyContent:"flex-start",
     
-    {`[Sender->${m.sender} and named->${m.room}] MESSAGE-> ${m.message} at ${m.currentDate} `}
+    }}>
+       {messages.map((m, i) => (
+        
+  <Typography key={i} variant="h6" component="div" gutterBottom  
+   sx={{display:"flex",
+    flexDirection:"column",
+    overflow:"clip",
+    backgroundImage:"linear-gradient(to bottom right,coral,lightblue)",
+    margin:"10px",
+    padding:" 3px", /* Inner padding */
+    maxWidth: "500px",/* Maximum width for responsiveness */
+    borderRadius:"10px",
+    maxHeight:"400px"
+   }}
+  > 
+    {console.log(m.message)}
+    <Box sx={{marginBottom:"0.2px",padding:"0px"}}><h6 style={{display:"inline", fontSize: "0.8em", 
+    color: "#333", margin: "0"}}>Sender: {`${m.sender}`}</h6> </Box>
+      <Box sx={{marginBottom:"0.2px",padding:"0px"}}><h4 style={{display:"inline-block", fontSize: "1em", 
+    color: "#333", margin: "0"}}>Message: {`${m.message}`}</h4> </Box>
+      <Box sx={{marginBottom:"0.2px",padding:"0px"}}><p style={{display:"inline-block", fontSize: "0.5em", 
+    color: "#333", margin: "0"}}>Time: {new Date(m.currentDate).toLocaleString()}</p> </Box>
+    
+   
   </Typography>
 ))}
 

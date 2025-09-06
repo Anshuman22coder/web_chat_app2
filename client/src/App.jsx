@@ -3,6 +3,8 @@ import { useEffect, useState, useMemo } from 'react'
 import {BrowserRouter as Router, Routes,Route, Link, NavLink} from "react-router-dom"
 import Group from "./Group"
 import Individual from "./Individual"
+import SunIcon from "./assets/sun_icon.jpeg";
+
 import {
   Box,
   Button,
@@ -30,21 +32,37 @@ function App()
       }}>
     <Router>
         
-        <nav style={{ padding: "15px", borderBottom: "2px solid gray" }}>
+        <nav style={{ padding: "15px", borderBottom: "2px solid gray" ,
+          display:'flex',justifyContent:"space-between"
+          ,alignItems:"center"
+        }}>
 
           <NavLink to="/" style={({isActive})=>({fontSize:isActive?"20px":"15px", margin: "10px", color:"whitesmoke" })}>Individual Chat</NavLink>
           <NavLink to="/group"style={({isActive})=>({fontSize:isActive?"20px":"15px", margin: "10px", color:"whitesmoke" })}>Group Chat</NavLink>
-         <span onClick={()=>
+         <img onClick={()=>
           {setColorNo((prev)=>(prev+1)%colors.length)
            setColor2No((prev)=>(prev+1)%color1.length)}
-  }  style={{fontSize:"15px",
-   margin:"10px",
-   color:"whitesmoke",
+           
+  }
+  src={ colorNo%2===0
+    ? "https://cdn-icons-png.flaticon.com/512/6714/6714978.png" // moon
+    : SunIcon // sun
+  }
+         alt="Toggle Colors"
+           style={{
+   marginTop:"20px",
+   marginLeft:"20px",
+   padding:"0.5px",
+   width:"40px",
+   height:"45px",
+   border: "2px solid white",
+   borderRadius:"20px",
+  transition: "background-color 1.0s ease",
    cursor: "pointer",
-   textDecoration: "underline",
-  }}>
-    COLOR TOGGLE
-        </span>
+  
+  }}/>
+    
+        
         </nav>
         <Routes>
           <Route path="/" element={<Individual/>}/>
