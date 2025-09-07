@@ -84,13 +84,12 @@ gsap.from(".Box h4 .a",{
 
   const [message, setMessage]=useState("")
   const [messages, setMessages] = useState([]);
+  const [messagesSender,setMessagesSender]=useState([]);
+
   //setting of permanent userId
-  const userId=useMemo(()=>{let userId=localStorage.getItem("userId");
-    if(!userId){
-      userId=uuidv4(); //generate once
-      localStorage.setItem("userId",userId);
-    }
-    return userId;
+  const userId=useMemo(()=>{
+
+    return localStorage.getItem("userId");   //email...
   },[])
   const socket=useMemo(()=>io("http://localhost:4000",{query:{userId}}),[]);  //tries to create a persistent connection between client to server , using useMemo() causes no re-rendering when some update is done in the state and hooks ,, but this will start afresh when the app is refreshed ,,
   const [room, setRoom] = useState("");
@@ -100,13 +99,19 @@ gsap.from(".Box h4 .a",{
   console.log(messages)
 
   const handleSubmit=(e)=>{
-
   e.preventDefault();//done to prevent default refresh of the page
-  
   socket.emit("message_Individual",{message,room})
+  
+  //set messagesSender here too...like
+  setMessagesSender((messagesSender)=>[...messagesSender,{receiver:room,sender:userId,message:message,currentDate:new Date().toLocaleString()}])
+  
 
   setMessage("")
   }
+
+useEffect(() => {//used just for error checking ..if any for the messagesSender
+  console.log("Updated messagesSender:", messagesSender);
+}, [messagesSender]);
 
 
   useEffect(()=>{
@@ -129,17 +134,20 @@ gsap.from(".Box h4 .a",{
    })
 
 
-
-
-
-
-
-
+  socket.on("chat-history_sender",(history2)=>{
+    setMessagesSender(history2);
+   /* console.log("I entered sender room ")
+    if(messagesSender){
+      console.log("not null",messagesSender)
+    }
+    else
+      console.log("nUll")*/
+  })
 
 
     socket.on("recieve-message", ({ id,sender ,message, currentDate}) => {
   console.log("Message room: for ",id,"and from sender", sender, "->", message);
-  setMessages((messages) => [...messages, { id,sender ,message, currentDate}]);
+  setMessages((messages) => [...messages, { reciever:id,sender ,message, currentDate}]);
 });
 
       return()=>{
@@ -150,6 +158,8 @@ gsap.from(".Box h4 .a",{
       }
   },[socket])  //only when this socket is changed then this will be re-rendered.
    
+  const sortedMessages=[...messages,...messagesSender].sort((a,b)=>new Date(a.currentDate)-new Date(b.currentDate))
+
   return (
     <>
       <Container maxWidth="sm" >
@@ -230,37 +240,46 @@ gsap.from(".Box h4 .a",{
         <Stack sx={{
     backgroundColor:messages.length>=1?"lightbrown":"lightred",
     padding: "2px",
-    borderRadius: "8px",
-    margin: "10px 1px",
-    display:"flex",
-    justifyContent:"flex-start",
+   
     
     }}>
-       {messages.map((m, i) => (
-        
-  <Typography key={i} variant="h6" component="div" gutterBottom  
-   sx={{display:"flex",
-    flexDirection:"column",
-    overflow:"clip",
-    backgroundImage:"linear-gradient(to bottom right,coral,lightblue)",
-    margin:"10px",
-    padding:" 3px", /* Inner padding */
-    maxWidth: "500px",/* Maximum width for responsiveness */
-    borderRadius:"10px",
-    maxHeight:"400px"
-   }}
-  > 
-    {console.log(m.message)}
-    <Box sx={{marginBottom:"0.2px",padding:"0px"}}><h6 style={{display:"inline", fontSize: "0.8em", 
-    color: "#333", margin: "0"}}>Sender: {`${m.sender}`}</h6> </Box>
-      <Box sx={{marginBottom:"0.2px",padding:"0px"}}><h4 style={{display:"inline-block", fontSize: "1em", 
-    color: "#333", margin: "0"}}>Message: {`${m.message}`}</h4> </Box>
-      <Box sx={{marginBottom:"0.2px",padding:"0px"}}><p style={{display:"inline-block", fontSize: "0.5em", 
-    color: "#333", margin: "0"}}>Time: {new Date(m.currentDate).toLocaleString()}</p> </Box>
-    
-   
-  </Typography>
-))}
+       {sortedMessages.map((m, i) => {
+        const isSender=m.sender===userId  ;;//check if current user is sender.
+        return(
+          <Box
+          key={i}
+          sx={{display:"flex",
+            justifyContent:isSender?"flex-end":"flex-start",
+            marginBottom:"8px",
+          }}>
+          <Box
+          sx={{backgroundColor:isSender?"#DCF8C6" : "#FFFFFF",
+              padding: "10px 14px",
+                  borderRadius: "12px",
+                  maxWidth: "70%",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+          }}>
+
+            <Typography
+                  variant="caption"
+                  sx={{ display: "block", textAlign: "right", color: "gray" }}
+                >{isSender?m.receiver:m.sender}
+            </Typography>
+          
+          <Typography variant="body1">{m.message}</Typography>
+          <Typography
+                  variant="caption"
+                  sx={{ display: "block", textAlign: "right", color: "gray" }}
+                >
+                  {new Date(m.currentDate).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+          </Typography>
+         </Box>
+         </Box>
+        ) })}
+  
 
       </Stack>
   

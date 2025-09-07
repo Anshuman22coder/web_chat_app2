@@ -4,6 +4,8 @@ import {BrowserRouter as Router, Routes,Route, Link, NavLink} from "react-router
 import Group from "./Group"
 import Individual from "./Individual"
 import SunIcon from "./assets/sun_icon.jpeg";
+import Landing from "./Landing"
+import ProtectedRoute from "./ProtectedRoute"
 
 import {
   Box,
@@ -21,6 +23,7 @@ function App()
   const color1=["red ","black"];
   const color2=["yellow", "darkblue"]
   const [color2No,setColor2No]=useState(0);
+
   return (
     <Box className="toggle" sx={{
         height: "100vh", // full viewport height
@@ -36,8 +39,9 @@ function App()
           display:'flex',justifyContent:"space-between"
           ,alignItems:"center"
         }}>
-
-          <NavLink to="/" style={({isActive})=>({fontSize:isActive?"20px":"15px", margin: "10px", color:"whitesmoke" })}>Individual Chat</NavLink>
+           <NavLink to="/" style={({isActive})=>({fontSize:isActive?"20px":"15px", margin: "10px", color:"whitesmoke" })}>Login</NavLink>
+         
+          <NavLink to="/chat" style={({isActive})=>({fontSize:isActive?"20px":"15px", margin: "10px", color:"whitesmoke" })}>Individual Chat</NavLink>
           <NavLink to="/group"style={({isActive})=>({fontSize:isActive?"20px":"15px", margin: "10px", color:"whitesmoke" })}>Group Chat</NavLink>
          <img onClick={()=>
           {setColorNo((prev)=>(prev+1)%colors.length)
@@ -65,8 +69,9 @@ function App()
         
         </nav>
         <Routes>
-          <Route path="/" element={<Individual/>}/>
-          <Route path="/group"element={<Group/>}/>
+          <Route path="/" element={<Landing/>}/>
+          <Route path="/chat" element={<ProtectedRoute><Individual/></ProtectedRoute>}/>
+          <Route path="/group"element={<ProtectedRoute><Group/></ProtectedRoute>}/>
         </Routes>
 
     </Router>

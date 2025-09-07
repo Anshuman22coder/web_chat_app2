@@ -1,0 +1,23 @@
+.btn{
+  background-color: #56779a;
+  color:rgb(205, 205, 213);
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
+  font-style: italic;
+}
+/* Hover effect */
+.btn:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+  color: #f0f0f0; /* Slightly lighter text color */
+  font-style: normal;
+  font-size: 20px;
+}
+.btn:visited{
+  background-color: #036656; /* Darker blue on hover */
+  color: #f0f0f0; /* Slightly lighter text color */
+  font-style: normal;
+  font-size: 20px;
+}
