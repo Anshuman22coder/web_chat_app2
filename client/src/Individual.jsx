@@ -263,7 +263,7 @@ useEffect(() => {//used just for error checking ..if any for the messagesSender
             <Typography
                   variant="caption"
                   sx={{ display: "block", textAlign: "right", color: "gray" }}
-                >{isSender?m.receiver:m.sender}
+                >{isSender?`To:${m.receiver}`:`From:${m.sender}`}
             </Typography>
           
           <Typography variant="body1">{m.message}</Typography>
