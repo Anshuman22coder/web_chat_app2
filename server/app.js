@@ -4,6 +4,7 @@ import { createServer } from "http"
 const app = express()
 
 import { Users, Messages, connectDb } from "./db.js"
+import { stat } from "fs"
 
 const server = createServer(app);
 const io = new Server(server, {
@@ -71,36 +72,63 @@ io.on("connection", async (socket) => {
     socket.to(room).emit("recieve-message", { message, sender: userId, room });
   });
 
-  socket.on("message_Individual", async ({ room, message }) => {
+  socket.on("message_Individual", async ({ room, message }, callback) => {
+  console.log("➡️ message_Individual received:", { room, message });
+
+  try {
     const currentDate = new Date();
     const receiverSocketId = userSocketmap[room.trim()];
-
-    if (receiverSocketId) {
-      try {
-        const savedMessage = await Messages.create({
-          receiver: room,
-          sender: userId,
-          message: message,
-          currentDate: currentDate
-        });
-
-        console.log({ room, message });
-        
-        // Emit the message to the correct receiver's socket
-        socket.to(receiverSocketId).emit("recieve-message", {
-          id: savedMessage.receiver,
-          sender: savedMessage.sender,
-          message: savedMessage.message,
-          currentDate: savedMessage.currentDate
-        });
-        
-      } catch (error) {
-        console.log("Could not perform DB transactions for message storage", error);
-      }
-    } else {
-        console.log(`User with ID ${room} is not currently online.`);
+    const receiver = await Users.findOne({ id: room.trim() }); // room = receiverId
+   console.log(receiver)
+    if (!receiver) {
+      console.log(`❌ User ${room} not found in DB`);
+      return callback({ status: "error", message: `User ${room} not found` });
     }
-  });
+
+    // Save the message in DB
+    const savedMessage = await Messages.create({
+      receiver: room,
+      sender: userId,
+      message,
+      currentDate,
+    });
+
+    // Create a unified message object to send back to clients
+    const messageData = {
+      receiver: savedMessage.receiver,
+      sender: savedMessage.sender,
+      message: savedMessage.message,
+      currentDate: savedMessage.currentDate,
+    };
+
+    // If receiver is online, deliver immediately
+    if (receiverSocketId) {
+      console.log(`📩 Delivering message to online user ${room}`);
+      
+      // Emit the message to the correct receiver's socket
+      socket.to(receiverSocketId).emit("recieve-message", messageData);
+
+      // Also emit the message back to the sender's own socket
+      // This ensures the sender's UI is updated instantly
+      socket.emit("recieve-message", messageData);
+
+      return callback({ status: "delivered" });
+    }
+
+    // If receiver exists but is offline
+    console.log(`💾 Stored message for offline user ${room}`);
+
+    // Still send the message back to the sender's UI
+    socket.emit("recieve-message", messageData);
+
+    return callback({ status: "stored-offline" });
+
+  } catch (error) {
+    console.error("🔥 DB failure in message_Individual:", error);
+    return callback({ status: "error", message: "db failure" });
+  }
+});
+
 
   socket.on("join-room", (room) => {
     socket.join(room);

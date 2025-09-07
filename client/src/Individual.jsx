@@ -91,23 +91,40 @@ gsap.from(".Box h4 .a",{
 
     return localStorage.getItem("userId");   //email...
   },[])
-  const socket=useMemo(()=>io("https://web-socket-chat-app-1-backend-3.onrender.com",{query:{userId}}),[]);  //tries to create a persistent connection between client to server , using useMemo() causes no re-rendering when some update is done in the state and hooks ,, but this will start afresh when the app is refreshed ,,
+  const socket=useMemo(()=>io("http://localhost:4000",{query:{userId}}),[]);  //tries to create a persistent connection between client to server , using useMemo() causes no re-rendering when some update is done in the state and hooks ,, but this will start afresh when the app is refreshed ,,
   const [room, setRoom] = useState("");
   const [socketID, setSocketId] = useState("");
   
 
   console.log(messages)
 
-  const handleSubmit=(e)=>{
-  e.preventDefault();//done to prevent default refresh of the page
-  socket.emit("message_Individual",{message,room})
-  
-  //set messagesSender here too...like
-  setMessagesSender((messagesSender)=>[...messagesSender,{receiver:room,sender:userId,message:message,currentDate:new Date().toLocaleString()}])
-  
+const handleSubmit = (e) => {
+  e.preventDefault();
 
-  setMessage("")
-  }
+  if (!message || !room) return;
+
+  socket.emit("message_Individual", { message, room }, (response) => {
+    console.log("Server response:", response); // This will now fire.
+
+    // A single, unified state update for both sent and received messages
+    if (response.status === "delivered" || response.status === "stored-offline") {
+      setMessages((prev) => [
+        ...prev,
+        {
+          receiver: room,
+          sender: userId,
+          message,
+          currentDate: new Date().toISOString(),
+        },
+      ]);
+    } else if (response.status === "error") {
+      alert(response.message);
+    }
+  });
+
+  setMessage("");
+};
+
 
 useEffect(() => {//used just for error checking ..if any for the messagesSender
   console.log("Updated messagesSender:", messagesSender);
