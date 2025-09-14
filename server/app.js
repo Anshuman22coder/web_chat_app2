@@ -147,7 +147,7 @@ io.on("connection", async (socket) => {
   });
 });
 
-app.get("/", (req, res) => {
+app.get("/health", (req, res) => {
   res.send("Server is running.");
 });
 
