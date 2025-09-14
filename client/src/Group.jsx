@@ -89,7 +89,7 @@ function Group() {
     return userId;
   }, []);
   const socket = useMemo(
-    () => io("http://localhost:4000/api", { query: { userId } }),
+    () => io("http://13.49.80.226/api", { query: { userId } }),
     []
   );
   const [room, setRoom] = useState("");
